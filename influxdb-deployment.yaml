@@ -1,0 +1,56 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: influxdb
+  namespace: influx
+  labels:
+    app: influxdb
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: influxdb
+      annotations:
+        # Include a hash of the config in the pod template
+        # This means that if the config changes, the deployment will be rolled
+        checksum/config: ef0b999b891afcb17d0bb7796e1be74fe99e6380bb940ab12646dcc7a0111094
+    spec:
+      containers:
+      - name: influxdb
+        image: influxdb:1.5.2-alpine
+        imagePullPolicy: "IfNotPresent"
+        resources:
+          limits:
+            cpu: 8
+            memory: 16Gi
+          requests:
+            cpu: 0.1
+            memory: 256Mi
+
+        ports:
+        - name: api
+          containerPort: 8086
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: api
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: api
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/influxdb
+        - name: config
+          mountPath: /etc/influxdb
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: config
+        configMap:
+          name: influxdb
