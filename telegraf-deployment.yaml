@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: telegraf
+  namespace: influx
+  labels:
+    app: telegraf
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: telegraf
+      annotations:
+        # Include a hash of the configmap in the pod template
+        # This means that if the configmap changes, the deployment will be rolled
+        checksum/config: bc41b5ee077f0c8f82ad8ea95d0e0cf8b20d8f1e96922a1a8c248d04548886e2
+    spec:
+      containers:
+      - name: telegraf
+        image: telegraf:1.5.3-alpine
+        imagePullPolicy: "IfNotPresent"
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 0.1
+            memory: 256Mi
+
+        volumeMounts:
+        - name: config
+          mountPath: /etc/telegraf
+        - name: varrunutmpro
+          mountPath: /var/run/utmp
+          readOnly: true
+      volumes:
+      - name: varrunutmpro
+        hostPath:
+          path: /var/run/utmp
+      - name: config
+        configMap:
+          name: telegraf
