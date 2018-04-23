@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kapacitor
+  namespace: influx
+  labels:
+    app: kapacitor
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kapacitor
+      annotations:
+        # Include a hash of the config in the pod template
+        # This means that if the config changes, the deployment will be rolled
+        checksum/config: 4288db92b0b480b518c813f119fad02524a90503f6ebf9b9eb703d60848f7e22
+    spec:
+      containers:
+      - name: kapacitor
+        image: kapacitor:1.4.1-alpine
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 2
+            memory: 2Gi
+          requests:
+            cpu: 0.1
+            memory: 256Mi
+
+        ports:
+        - containerPort: 9092
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/kapacitor
+        - name: config
+          mountPath: /etc/kapacitor/
+      volumes:
+      - name: config
+        configMap:
+          name: kapacitor
+      - name: data
+        emptyDir: {}
