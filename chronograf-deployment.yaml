@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: chronograf
+  namespace: influx
+  labels:
+    app: chronograf
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chronograf
+      annotations:
+        # Include a hash of the secret in the pod template
+        # This means that if the secret changes, the deployment will be rolled
+        checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    spec:
+      containers:
+      - name: chronograf
+        image: chronograf:1.4.3.1-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8888
+          name: api
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: api
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: api
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/chronograf
+        resources:
+          limits:
+            cpu: 2
+            memory: 2Gi
+          requests:
+            cpu: 0.1
+            memory: 256Mi
+
+      volumes:
+        - name: data
+          emptyDir: {}
