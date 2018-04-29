@@ -28,6 +28,7 @@ data:
       urls = [
         "http://influxdb.influx:8086"
       ]
+    [[inputs.system]]
     [[inputs.cpu]]
       percpu = false
       totalcpu = true
@@ -58,4 +59,5 @@ data:
       offset = "oldest"
       data_format = "influx"
       max_message_len = 65536
-    [[inputs.system]]
+    [[inputs.mongodb]]
+      servers = ["mongodb://mongo.mongo:27017"]
