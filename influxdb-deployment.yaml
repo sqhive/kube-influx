@@ -21,9 +21,6 @@ spec:
         image: influxdb:1.5.2-alpine
         imagePullPolicy: "IfNotPresent"
         resources:
-          limits:
-            cpu: 8
-            memory: 16Gi
           requests:
             cpu: 0.1
             memory: 256Mi
